@@ -1,0 +1,51 @@
+---
+- block:
+    - name: install epel and elrepo for RHEL7
+      yum:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+        - https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+        - https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
+    - name: install wireguard for RHEL7
+      yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+        - kmod-wireguard
+        - wireguard-tools
+      register: result
+    - set_fact:
+         installed: true
+      when: result is succeeded
+  when:
+    - ansible_facts['distribution'] == "RedHat"
+    - ansible_facts['distribution_major_version'] == "7"
+
+- block:
+    - name: install epel and elrepo for RHEL8
+      yum:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+        - https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        - https://www.elrepo.org/elrepo-release-8.el8.elrepo.noarch.rpm
+    - name: install wireguard for RHEL8
+      dnf:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+        - kmod-wireguard
+        - wireguard-tools
+      register: result
+    - set_fact:
+         installed: true
+      when: result is succeeded
+  when:
+    - ansible_facts['distribution'] == "RedHat"
+    - ansible_facts['distribution_major_version'] == "8"
+

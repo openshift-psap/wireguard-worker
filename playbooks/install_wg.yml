@@ -1,0 +1,14 @@
+---
+#- name: Pre-install checks
+#  hosts: localhost
+#  connection: local
+#  gather_facts: no
+#  tasks:
+#  - import_role:
+#      name: install_wg
+#      tasks_from: scaleup_checks.yml
+
+- name: install wireguard
+  hosts: new_wg
+  roles:
+  - install_wg

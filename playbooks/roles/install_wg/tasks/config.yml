@@ -1,0 +1,39 @@
+---
+- name: check if the private key exists
+  stat: 
+    path: "{{ wg_dir }}/privatekey"
+  register: private_key_file
+
+- name: generate private key for new node
+  shell: "wg genkey > {{ wg_dir }}/private_key"
+  when: private_key_file.stat.exists == false
+
+- name: read private key
+  command: "cat {{ wg_dir }}/privatekey"
+  register: private
+
+- name: check if the private key exists
+  stat: 
+    path: "{{ wg_dir }}/publickey"
+  register: public_key_file
+
+- name: generate public key for new node
+  shell: "wg pubkey < {{ wg_dir }}/privatekey > {{ wg_dir }}/publickey"
+  when: public_key_file.stat.exists == false
+
+- name: read private key
+  command: "cat {{ wg_dir }}/publickey"
+  register: public
+
+- name: save keys in ansible facts
+  set_fact:
+    private_key: "{{ private.stdout }}"
+    public_key: "{{ public.stdout }}"
+    cacheable: yes
+
+- name: create node wireguard config from template
+  template: 
+    src: wg0.conf.j2
+    dest: "{{ wg_dir }}/wg0-test.conf"
+    force: no
+

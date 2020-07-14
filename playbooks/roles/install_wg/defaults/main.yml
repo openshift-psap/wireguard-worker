@@ -1,0 +1,6 @@
+---
+wg_dir: /etc/wireguard
+listen_port: 51820
+allowed_ips: 192.168.111.0/24
+endpoint: 10.1.184.197:51820
+
