@@ -1,0 +1,8 @@
+---
+wg_node_support_packages:
+  - rsync
+  - podman
+  - buildah
+  - skopeo
+  - vim
+  - tmux

@@ -1,0 +1,33 @@
+---
+- name: Check Subscription-manager status
+  command: subscription-manager status
+  ignore_errors: True
+  register: rhsm_status 
+  when:
+    - ansible_facts['distribution'] == "RedHat"
+    - ansible_facts['distribution_major_version'] == "7"
+
+- block:
+    - name: Disable custom-node repos 
+      command: subscription-manager repos --disable="*"
+      ignore_errors: True
+    
+    - name: Register and subscribe to needed pools.
+      redhat_subscription:
+        state: present
+        username: {{ rhsm_user }}
+        password: {{ rhsm_passwd }}
+        pool_ids:
+          - 8a85f98c60dedfb40160dee19b510032
+        register: rhsm_register_r
+        retries: 5
+        delay: 10
+        until: not rhsm_register_r.failed
+    
+    - name: Enable basic repos
+      command: >
+        subscription-manager repos --enable="rhel-7-server-rpms" \
+        --enable="rhel-7-server-extras-rpms" \
+        --enable="rhel-7-server-optional-rpms" 
+      register: rhsm_repos
+  when: rhsm_status.rc == 1

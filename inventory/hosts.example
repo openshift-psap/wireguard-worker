@@ -8,10 +8,19 @@ ansible_user=root
 # user must be configured for passwordless sudo
 #ansible_become=True
 
+address=192.168.111.11
+
 ###############################################################################
 # Required configuration variables                                            #
 ###############################################################################
 
 # For running RHEL wireguard installation
-[new_wg]
-mycluster-worker-[4:6].example.com
+[server]
+# mycluster-master-[1:3].example.com
+
+[new_client]
+# mycluster-worker-[4:6].example.com
+
+[new_client:vars]
+#rhsm_user: 'foo'
+#rhsm_user: 'var'	
