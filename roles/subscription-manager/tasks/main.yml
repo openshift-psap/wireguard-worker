@@ -15,8 +15,8 @@
     - name: Register and subscribe to needed pools.
       redhat_subscription:
         state: present
-        username: {{ rhsm_user }}
-        password: {{ rhsm_passwd }}
+        username: "{{ rhsm_user }}"
+        password: "{{ rhsm_password }}"
         pool_ids:
           - 8a85f98c60dedfb40160dee19b510032
         register: rhsm_register_r

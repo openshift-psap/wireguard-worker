@@ -1,9 +1,8 @@
 ---
-# WG Perf Research CI cluster
-- name : Subscribe and provision
+- name: Subscribe and provision
   hosts: new_client
   roles:
-  - subscription_manager 
+  - subscription-manager
 
 - name: Provision needed support tools
   hosts: new_client
@@ -14,3 +13,17 @@
   hosts: all
   roles:
   - install_wg
+
+- name: configure wireguard
+  hosts: server
+  roles:
+  - configure_wg
+
+- name: restart wg
+  hosts: all
+  tasks:
+    - name: Start and enable WireGuard service
+      service:
+        name: wg-quick@wg0
+        state: restarted
+        enabled: yes
