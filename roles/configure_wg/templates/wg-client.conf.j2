@@ -1,0 +1,10 @@
+[Interface]
+Address = {{ vpn_network }}.{{ansible_loop.index|int + 2}}/32
+PrivateKey = {{ private_key_files.results[ansible_loop.index0|int].stdout }}
+ListenPort = {{ listen_port }}
+DNS = {{ vpn_network }}.1
+
+[Peer]
+PublicKey = {{ public_key }}
+Endpoint = {{ ansible_default_ipv4.address }}:{{ listen_port }}
+AllowedIPs = {{ vpn_network }}.0/24,{{ allowed_ips }}

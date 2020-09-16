@@ -8,7 +8,17 @@ ansible_user=root
 # user must be configured for passwordless sudo
 #ansible_become=True
 
-address=192.168.111.11
+# WireGuard new private NIC server IP
+#address=192.168.111.1
+
+# VPN network subnet
+#vpn_network=192.168.111
+
+# Existing baremetal private NIC CIDR
+#allowed_ips=192.168.222.0/24
+
+# Public IP of new client endpoint (keep port consistent)
+#endpoint=10.1.184.197:51820
 
 ###############################################################################
 # Required configuration variables                                            #
@@ -16,11 +26,11 @@ address=192.168.111.11
 
 # For running RHEL wireguard installation
 [server]
-# mycluster-master-[1:3].example.com
+#mycluster-master-[1:3].example.com
 
 [new_client]
-# mycluster-worker-[4:6].example.com
+#mycluster-worker-[4:6].example.com
 
 [new_client:vars]
-#rhsm_user: 'foo'
-#rhsm_user: 'var'	
+#rhsm_user=
+#rhsm_password=

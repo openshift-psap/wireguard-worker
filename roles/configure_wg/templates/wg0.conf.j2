@@ -1,0 +1,9 @@
+[Interface]
+Address = {{ vpn_network }}.1/32
+PrivateKey = {{ private_key }}
+ListenPort = {{ listen_port }}
+
+[Peer]
+PublicKey = {{ public_key_files.results[0].stdout }}
+Endpoint = {{ endpoint }}
+AllowedIPs = {{ vpn_network }}.0/24

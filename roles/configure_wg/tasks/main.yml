@@ -1,0 +1,117 @@
+---
+- name: Check if the private key exists
+  stat: 
+    path: "{{ wg_dir }}/privatekey"
+  register: private_key_file
+
+- name: Generate private key (server side) for new node
+  shell: "wg genkey > {{ wg_dir }}/privatekey"
+  when: private_key_file.stat.exists == false
+
+- name: Read private key
+  command: "cat {{ wg_dir }}/privatekey"
+  register: private
+
+- name: Check if the public key exists
+  stat: 
+    path: "{{ wg_dir }}/publickey"
+  register: public_key_file
+
+- name: Generate public key for new node
+  shell: "wg pubkey < {{ wg_dir }}/privatekey > {{ wg_dir }}/publickey"
+  when: public_key_file.stat.exists == false
+
+- name: Read private key
+  command: "cat {{ wg_dir }}/publickey"
+  register: public
+
+- name: Save keys in ansible facts
+  set_fact:
+    private_key: "{{ private.stdout }}"
+    public_key: "{{ public.stdout }}"
+    cacheable: yes
+ 
+- name: Generate private and public keys for the client and server
+  shell: umask 077; wg genkey | tee {{ item }}.private | wg pubkey > {{ item }}.public
+  register: key_files
+  loop: "{{ groups['new_client'] }}"
+
+- name: Register private key file contents
+  shell: cat {{ item }}.private
+  register: private_key_files
+  loop: "{{ groups['new_client'] }}"
+
+- name: Register public key file contents
+  shell: cat {{ item }}.public
+  register: public_key_files
+  loop: "{{ groups['new_client'] }}"
+
+- name: Check if wg0-server.conf already exists
+  stat:
+    path: /etc/wireguard/wg0.conf
+  register: wg0_conf
+
+- name: Create node wireguard config from template
+  template:
+    src: wg0.conf.j2
+    dest: "{{ wg_dir }}/wg0.conf"
+    force: no
+  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+
+- name: Generate directories for client configs
+  file:
+    path: "/tmp/wg_clients/client_{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0600
+  loop: "{{ groups['new_client'] }}"
+
+- name: Generate client configs
+  template:
+    src: "wg-client.conf.j2"
+    dest: "/tmp/wg_clients/client_{{ item }}/wg0-client.conf"
+    owner: root
+    group: root
+    mode: 0600
+  loop: "{{ groups['new_client'] }}"
+  loop_control:
+    extended: yes
+
+- name: Copy the file from server to client using syncronize pull
+  synchronize:
+    src: "/tmp/wg_clients/client_{{ item }}/wg0-client.conf"
+    dest: "/etc/wireguard/wg0.conf"
+    mode: pull
+  delegate_to: "{{ item }}"
+  register: syncfile
+  run_once: true
+  loop: "{{ groups['new_client'] }}"
+
+#- name: Insert new client to server wireguard config
+#  blockinfile:
+#    path: "{{ wg_dir }}/wg0.conf"
+#    block: |
+#      [Peer]
+#      PublicKey = {{ public_key_files.results[ansible_loop.index0|int].stdout }}
+#      Endpoint = {{ item }}:51820
+#      AllowedIPs = {{ allowed_ips }}
+#  loop: "{{ groups['new_client'] }}"
+#  loop_control:
+#    extended: yes
+
+- name: Enable WireGuard kernel module
+  modprobe:
+    name: wireguard
+    state: present
+  register: wireguard_module_enabled
+  until:  wireguard_module_enabled is succeeded
+  retries: 10
+  delay: 10
+  failed_when: wireguard_module_enabled is failure
+
+- name: Start and enable WireGuard service
+  service:
+    name: wg-quick@wg0
+    state: restarted
+    enabled: yes

@@ -1,5 +1,5 @@
 ---
-wg_node_support_packages:
+wg_node_packages:
   - rsync
   - podman
   - buildah
