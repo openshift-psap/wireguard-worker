@@ -1,4 +1,4 @@
-# wg-scale 
+# wireguard-worker
 
 This repository contains [Ansible](https://www.ansible.com/) roles and
 playbooks to create a [WireGuard](https://www.wireguard.com/) VPN between machines.
@@ -30,7 +30,7 @@ Required variables include:
 ## Run the install_wg playbook
 
 ```bash
-cd wg-scale
+cd wireguard-worker
 ansible-playbook -i inventory/hosts playbooks/install_wg.yml
 ```
 
