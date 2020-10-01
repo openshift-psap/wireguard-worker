@@ -29,7 +29,7 @@
   set_fact:
     private_key: "{{ private.stdout }}"
     public_key: "{{ public.stdout }}"
-    cacheable: yes
+    cacheable: true
  
 - name: Generate private and public keys for the client and server
   shell: umask 077; wg genkey | tee {{ item }}.private | wg pubkey > {{ item }}.public
@@ -55,7 +55,7 @@
   template:
     src: wg0.conf.j2
     dest: "{{ wg_dir }}/wg0.conf"
-    force: no
+    force: false
   when: wg0_conf is not defined or wg0_conf.stat.exists == false
 
 - name: Generate directories for client configs
@@ -76,7 +76,7 @@
     mode: 0600
   loop: "{{ groups['new_client'] }}"
   loop_control:
-    extended: yes
+    extended: true
 
 - name: Copy the file from server to client using syncronize pull
   synchronize:
@@ -98,14 +98,14 @@
 #      AllowedIPs = {{ allowed_ips }}
 #  loop: "{{ groups['new_client'] }}"
 #  loop_control:
-#    extended: yes
+#    extended: true
 
 - name: Enable WireGuard kernel module
   modprobe:
     name: wireguard
     state: present
   register: wireguard_module_enabled
-  until:  wireguard_module_enabled is succeeded
+  until: wireguard_module_enabled is succeeded
   retries: 10
   delay: 10
   failed_when: wireguard_module_enabled is failure
@@ -114,4 +114,4 @@
   service:
     name: wg-quick@wg0
     state: restarted
-    enabled: yes
+    enabled: true
