@@ -1,7 +1,7 @@
 ---
 - name: Check Subscription-manager status
   command: subscription-manager status
-  ignore_errors: True
+  ignore_errors: true
   register: rhsm_status 
   when:
     - ansible_facts['distribution'] == "RedHat"
@@ -10,7 +10,7 @@
 - block:
     - name: Disable custom-node repos 
       command: subscription-manager repos --disable="*"
-      ignore_errors: True
+      ignore_errors: true
     
     - name: Register and subscribe to needed pools.
       redhat_subscription:
